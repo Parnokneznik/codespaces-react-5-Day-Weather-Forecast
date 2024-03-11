@@ -1,78 +1,143 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f0f0f0;
+* {
+  box-sizing: border-box;
 }
 
-.App {
-  text-align: center;
-  margin-top: 50px;
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #c9c9c9;
+}
+
+.app {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  padding: 15px 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .app-title {
-  color: #333;
+  margin: 0;
+  font-size: 28px;
+  color: #fff;
 }
 
-.weather-container {
+.login-form {
   display: flex;
-  justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
-  margin-top: 20px;
 }
 
-.city {
-  background-color: #fff;
+.logout-btn,
+button {
+  padding: 12px 24px;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin: 10px;
   cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-.city:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+.login-btn {
+  background-color: #28a947;
+  color: white;
+  border: none;
 }
 
-.city-name {
-  font-size: 24px;
-  margin-bottom: 10px;
+.login-btn:hover {
+  background-color: #218838;
+}
+
+.logout-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+}
+
+.logout-btn:hover {
+  background-color: #c82333;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+input[type="text"],
+input[type="password"],
+button {
+  padding: 12px;
+  margin-right: 15px;
+  border-radius: 10px;
+  border: 1px solid #cccccc;
+  transition: border-color 0.3s;
+}
+
+input[type="text"],
+input[type="password"] {
+  flex: 1;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: #4e54c8;
+}
+
+.error-message {
+  color: #ff6b6b;
+  margin-top: 10px;
+}
+
+.weather-info {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .forecast {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .forecast-item {
-  flex: 1;
-  padding: 10px;
-  text-align: center;
+  width: calc(20% - 20px);
+  margin: 0 10px 20px 0;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  background-color: #fff;
+  transition: box-shadow 0.3s;
+  text-align: center; 
 }
 
-.date {
-  font-size: 16px;
+.forecast-item:hover {
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
-.temperature {
-  font-size: 20px;
-  margin-bottom: 5px;
-}
-
-.description {
-  font-size: 16px;
-  margin-bottom: 5px;
-}
-
-.humidity,
-.wind-speed {
-  font-size: 14px;
-  margin-bottom: 5px;
+.datum {
+  font-weight: bold;
+  margin: 0;
 }
 
 .weather-icon {
-  width: 50px;
-  height: 50px;
+  display: block;
+  margin: 15px auto;
+}
+
+.teplota,
+.popis,
+.vlhkost,
+.rychlost-větru {
+  margin: 5px 0;
 }

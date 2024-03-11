@@ -1,97 +1,104 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './App.css';
-
-const cities = [
-  { name: 'New York', id: '5128581' },
-  { name: 'London', id: '2643743' },
-  { name: 'Tokyo', id: '1850147' },
-  { name: 'Sydney', id: '2147714' },
-  { name: 'Paris', id: '2988507' }
-];
 
 const API_KEY = 'f2ec3bb93f6a5769697de8723b967323';
 
 const App = () => {
-  const [weatherData, setWeatherData] = useState([]);
+  const [weatherData, setWeatherData] = useState(null);
+  const [cityName, setCityName] = useState('');
+  const [error, setError] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const promises = cities.map(city =>
-        fetch(`https://api.openweathermap.org/data/2.5/forecast?id=${city.id}&appid=${API_KEY}`)
-          .then(response => response.json())
-          .then(data => {
-            console.log('Data for city:', city.name, data);
-            return {
-              name: city.name,
-              id: city.id,
-              forecasts: data.list
-                .filter((item, index) => index % 8 === 0) 
-                .map(item => ({
-                  date: item.dt_txt,
-                  temperature: Math.round(item.main.temp - 273.15), 
-                  description: item.weather[0].description,
-                  icon: item.weather[0].icon,
-                  humidity: item.main.humidity,
-                  windSpeed: item.wind.speed
-                }))
-            };
-          })
-      );
-      const results = await Promise.all(promises);
-      console.log('All data:', results);
-      setWeatherData(results);
-    };
+  const handleSearch = async () => {
+    if (!isLoggedIn) {
+      setError('Pro vyhledání města se prosím přihlaste');
+      return;
+    }
+    
+    if (!cityName) {
+      setError('Zadej název města');
+      return;
+    }
 
-    fetchData();
-  }, []);
-
-  const handleCityClick = async (cityId) => {
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?id=${cityId}&appid=${API_KEY}`);
-    const data = await response.json();
-    console.log('Data after click:', data);
-    const newWeatherData = weatherData.map(city => {
-      if (city.id === cityId) {
-        return {
-          ...city,
-          forecasts: data.list
-            .filter((item, index) => index % 8 === 0) 
-            .map(item => ({
-              date: item.dt_txt,
-              temperature: Math.round(item.main.temp - 273.15),
-              description: item.weather[0].description,
-              icon: item.weather[0].icon,
-              humidity: item.main.humidity,
-              windSpeed: item.wind.speed
-            }))
-        };
+    try {
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${API_KEY}`);
+      if (!response.ok) {
+        throw new Error('Město nebylo nalezeno');
       }
-      return city;
+      const data = await response.json();
+      const dailyForecast = filterDailyForecast(data.list);
+      setWeatherData({ city: data.city, list: dailyForecast });
+      setError('');
+    } catch (error) {
+      setWeatherData(null);
+      setError('Město nebylo nalezeno');
+    }
+  };
+
+  const filterDailyForecast = (forecastList) => {
+    const filteredForecast = forecastList.filter(item => {
+      const date = new Date(item.dt_txt).getHours(); // Získá hodinu z datumu
+      return date === 15;
     });
-    setWeatherData(newWeatherData);
+    return filteredForecast;
+  };
+
+  const handleLogin = () => {
+    if (username === 'user' && password === 'pass') {
+      setIsLoggedIn(true);
+      setUsername('');
+      setPassword('');
+      setError('');
+    } else {
+      setError('Neplatné uživatelské jméno nebo heslo');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setWeatherData(null);
   };
 
   return (
-    <div className="App">
-      <h1 className="app-title">5-Day Weather Forecast</h1>
-      <div className="weather-container">
-        {weatherData.map(city => (
-          <div key={city.id} className="city" onClick={() => handleCityClick(city.id)}>
-            <h2 className="city-name">{city.name}</h2>
-            <div className="forecast">
-              {city.forecasts && city.forecasts.map(forecast => (
-                <div key={forecast.date} className="forecast-item">
-                  <p className="date">{forecast.date}</p>
-                  <p className="temperature">{forecast.temperature}°C</p>
-                  <p className="description">{forecast.description}</p>
-                  <p className="humidity">Humidity: {forecast.humidity}%</p>
-                  <p className="wind-speed">Wind Speed: {forecast.windSpeed} m/s</p>
-                  <img src={`http://openweathermap.org/img/w/${forecast.icon}.png`} alt="weather icon" className="weather-icon" />
-                </div>
-              ))}
-            </div>
+    <div className="app">
+      <header className="header">
+        <h1 className="app-title">5-Day Weather Forecast</h1>
+        {!isLoggedIn ? (
+          <div className="login-form">
+            <input type="text" placeholder="Uživatelské jméno" value={username} onChange={(e) => setUsername(e.target.value)} />
+            <input type="password" placeholder="Heslo" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <button onClick={handleLogin}>Přihlásit se</button>
           </div>
-        ))}
-      </div>
+        ) : (
+          <button className="logout-btn" onClick={handleLogout}>Odhlásit se</button>
+        )}
+      </header>
+      {isLoggedIn && (
+        <div className="search-container">
+          <input type="text" placeholder="Zadejte název města" value={cityName} onChange={(e) => setCityName(e.target.value)} />
+          <button onClick={handleSearch}>Vyhledat</button>
+          {error && <p className="error-message">{error}</p>}
+        </div>
+      )}
+      {weatherData && (
+        <div className="weather-info">
+          <h2>{weatherData.city.name}</h2>
+          <div className="forecast">
+            {weatherData.list.map((item) => (
+              <div key={item.dt} className="forecast-item">
+                <p className="datum">{item.dt_txt}</p>
+                <p className="teplota">{Math.round(item.main.temp - 273.15)}°C</p>
+                <p className="popis">{item.weather[0].description}</p>
+                <p className="vlhkost">Humidity: {item.main.humidity}%</p>
+                <p className="rychlost větru">Wind Speed: {item.wind.speed} m/s</p>
+                <img src={`http://openweathermap.org/img/w/${item.weather[0].icon}.png`} alt="weather icon" className="weather-icon" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
